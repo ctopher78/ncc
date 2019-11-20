@@ -10,6 +10,9 @@ click = "*"
 pynetbox = "*"
 requests = "*"
 nornir = "*"
+pandevice = "*"
+xmltodict = "*"
+gitpython = "*"
 
 [requires]
 python_version = "3.7"

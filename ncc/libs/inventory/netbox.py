@@ -17,7 +17,7 @@ class MissingRequiredDeviceField(Exception):
 netmiko_conn_options = {
     "netmiko": {
         "extras": {
-            "banner_timeout": 7
+            "banner_timeout": 20
         }
     }
 }
