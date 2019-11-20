@@ -15,7 +15,8 @@ from nornir.plugins.functions.text import print_result
 log = "/path-to-log"
 user_home = os.path.expanduser("~")
 save_path = os.path.join(user_home, "repos/gusto/it-netconfigs")
-sites = ["usden1", "usden2", "ussfo1", "uscol1", "uscol2", "uscol3"]
+#sites = ["usden1", "usden2", "ussfo1", "uscol1", "uscol2", "uscol3"]
+sites = ["usden1", "usden2"]
 collect_freq = 60 # minutes
 
 
@@ -51,11 +52,11 @@ collect_freq = 60 # minutes
 def main(loglevel, console, hide_secrets, retries):
     logging.getLogger("nornir")
     # get inventory
-    devices = get_devices(filter="", num_workers=5, loglevel=loglevel, console=console, netbox_token=creds.get_nb_token())
+    devices = get_devices(filter="", num_workers=10, loglevel=loglevel, console=console, netbox_token=creds.get_nb_token())
 
     creds.set_device_defaults(devices)
 
-    configs_by_site = dict()
+    # Collect configs for all network devices
     # Shard out work by site to minimize resource issues
     for site in sites:
         logging.info("Collecting configs for: %s", site)
@@ -63,6 +64,15 @@ def main(loglevel, console, hide_secrets, retries):
         nornir_obj, results = collect.configs(devices.filter(site=site), hide_secrets, retries)
 
         write_configs(site, nornir_obj)
+
+    # Eventually send message to slack that shows
+    # which devices we failed to collect configs for
+    for h, r in results.failed_hosts.items():
+        print("Exec: ", r[0].exception)
+        print("result: ", r[0].result)
+
+    # Add, commit, and push collected configs to remote
+    # repo as new branch.
 
 
 def write_configs(site, nornir_obj):
@@ -79,7 +89,7 @@ def write_configs(site, nornir_obj):
 
 
 class GitWrite():
-    def __init__(repo_path, nornir_obj):
+    def __init__(repo_path):
         self.repo_path = repo_path
 
     def add():

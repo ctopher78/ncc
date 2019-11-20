@@ -43,19 +43,14 @@ faild_hosts = list()
 
 
 def configs(devices, hide_secrets, retries):
-    d = devices.filter(name="usden2-as-1")
-    results = d.run(task=_collect, hide_secrets=hide_secrets)
+    results = devices.run(task=_collect, hide_secrets=hide_secrets)
 
     retried = 0
     if results.failed and retried < retries:
-        print("##\n##FAILED HOSTS: \n", results.failed_hosts)
-        r = d.run(task=_collect, on_failed=True, on_good=False, hide_secrets=hide_secrets)
+        r = devices.run(task=_collect, on_failed=True, on_good=False, hide_secrets=hide_secrets)
         retried += 1
 
-    if results.failed:
-        print("##\n##FAILED HOSTS: \n", results.failed_hosts.keys())
-
-    return d, results
+    return devices, results
 
 
 def _collect(task, hide_secrets):
