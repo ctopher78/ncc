@@ -12,8 +12,8 @@ requests = "*"
 nornir = "*"
 pandevice = "*"
 xmltodict = "*"
-gitpython = "*"
 black = "*"
+github3-py = "*"
 
 [requires]
 python_version = "3.7"

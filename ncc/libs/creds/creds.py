@@ -39,3 +39,16 @@ def get_nb_token():
         )       
 
     return token
+
+
+def get_github_token():
+    "Retrieves Github Token from env var or Vault"
+
+    token = os.environ.get("GH_TOKEN")
+
+    if not token:
+         token = getpass.getpass(
+            "\nPlease enter netbox token (or set `export GH_TOKEN=<token>` to avoid this message): "
+        )       
+
+    return token

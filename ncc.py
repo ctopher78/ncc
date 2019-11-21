@@ -12,13 +12,12 @@ from nornir.plugins.functions.text import print_result
 
 
 # Configs
-log = "/path-to-log"
-user_home = os.path.expanduser("~")
-save_path = os.path.join(user_home, "repos/gusto/it-netconfigs")
-#sites = ["usden1", "usden2", "ussfo1", "uscol1", "uscol2", "uscol3"]
-sites = ["usden1", "usden2"]
+repo = "it-netconfigs"
+org = "Gusto"
+sites = ["usden1", "usden2", "ussfo1", "uscol1", "uscol2", "uscol3"]
 collect_freq = 60 # minutes
 
+failed_hosts = dict()
 
 @click.command()
 @click.option(
@@ -52,7 +51,7 @@ collect_freq = 60 # minutes
 def main(loglevel, console, hide_secrets, retries):
     logging.getLogger("nornir")
     # get inventory
-    devices = get_devices(filter="", num_workers=10, loglevel=loglevel, console=console, netbox_token=creds.get_nb_token())
+    devices = get_devices(filter="", num_workers=15, loglevel=loglevel, console=console, netbox_token=creds.get_nb_token())
 
     creds.set_device_defaults(devices)
 
@@ -65,45 +64,34 @@ def main(loglevel, console, hide_secrets, retries):
 
         write_configs(site, nornir_obj)
 
-    # Eventually send message to slack that shows
+        failed_hosts.update(results.failed_hosts)
+
+    # Eventually send message to slack that show
     # which devices we failed to collect configs for
-    for h, r in results.failed_hosts.items():
-        print("Exec: ", r[0].exception)
-        print("result: ", r[0].result)
+    for h, r in failed_hosts.items():
+        print("Execption: ", r[0].exception)
+        #print("result: ", r[0].result)
 
     # Add, commit, and push collected configs to remote
     # repo as new branch.
 
 
 def write_configs(site, nornir_obj):
-    configs = dict()
+    configs = list()
 
-    base_dir = os.path.join(save_path, site)
-    os.makedirs(base_dir, exist_ok=True)
-
+    print("Writing configs")
     for hostname, nr_obj in nornir_obj.inventory.hosts.items():
         if nr_obj.get("configs"):
-            filename = os.path.join(base_dir, hostname+".cfg")
-            with open(filename, "w") as fh:
-                fh.write(nr_obj.get("configs"))
+            config = dict()
+            config["path"] = os.path.join(site, hostname+".cfg")
+            config["content"] = nr_obj.get("configs")
+            config["mode"] = "100644"
 
+            configs.append(config)
 
-class GitWrite():
-    def __init__(repo_path):
-        self.repo_path = repo_path
+    gh = write.Github(creds.get_github_token(), "Gusto", "it-netconfigs", "master")
+    gh.push(configs)
 
-    def add():
-        pass
-
-    def commit(comment):
-        pass
-
-
-    # redact configs
-    # write configs to local git directory
-    # git add ; git commit; git push to branch 
-
-    # git pr
 
 
 if __name__ == "__main__":
