@@ -13,7 +13,7 @@ from nornir.plugins.functions.text import print_result
 
 # Configs
 repo = "it-netconfigs"
-org = "Gusto"
+org = "ctopher78" # github user or org
 sites = ["usden1", "usden2", "ussfo1", "uscol1", "uscol2", "uscol3"]
 collect_freq = 60 # minutes
 
