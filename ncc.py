@@ -13,6 +13,7 @@ from nornir.plugins.functions.text import print_result
 
 # Configs
 repo = "it-netconfigs"
+branch ="master"
 org = "ctopher78" # github user or org
 sites = ["usden1", "usden2", "ussfo1", "uscol1", "uscol2", "uscol3"]
 collect_freq = 60 # minutes
@@ -89,7 +90,7 @@ def write_configs(site, nornir_obj):
 
             configs.append(config)
 
-    gh = write.Github(creds.get_github_token(), "Gusto", "it-netconfigs", "master")
+    gh = write.Github(creds.get_github_token(), org, repo, branch)
     gh.push(configs)
 
 
