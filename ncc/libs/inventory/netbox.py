@@ -12,7 +12,7 @@ class MissingRequiredDeviceField(Exception):
     pass
 
 
-# Gusto option to deal with WLC
+# Option to deal with WLC
 # ssh banner timeouts
 netmiko_conn_options = {
     "netmiko": {
